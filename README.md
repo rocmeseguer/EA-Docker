@@ -22,6 +22,32 @@ El proyecto principal utiliza una arquitectura de microservicios con:
 - Proxy inverso Nginx
 - Redes Docker aisladas (frontend-network y backend-network)
 
+```mermaid
+graph TD
+    Client([Cliente Externo])
+    subgraph frontend-network
+        Proxy[Proxy Nginx]
+    end
+    subgraph backend-network
+        Frontend[Frontend React]
+        API[API TypeScript]
+        MongoDB[(MongoDB)]
+    end
+    
+    Client -->|HTTP 80| Proxy
+    Proxy -->|HTTP| Frontend
+    Proxy -->|/api| API
+    API -->|MongoDB Protocol| MongoDB
+    
+    style Client fill:#f9f,stroke:#333,stroke-width:2px
+    style frontend-network fill:#f0f0f0,stroke:#333,stroke-width:2px
+    style backend-network fill:#e1e1e1,stroke:#333,stroke-width:2px
+    style Proxy fill:#85C1E9,stroke:#333,stroke-width:2px
+    style Frontend fill:#82E0AA,stroke:#333,stroke-width:2px
+    style API fill:#F8C471,stroke:#333,stroke-width:2px
+    style MongoDB fill:#C39BD3,stroke:#333,stroke-width:2px
+```
+
 ### Redes Docker
 - `frontend-network`: Red pública donde solo está expuesto el proxy
 - `backend-network`: Red interna donde están los servicios (api, frontend, mongo)
