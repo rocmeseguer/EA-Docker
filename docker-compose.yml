@@ -1,0 +1,51 @@
+version: '3.8'
+services:
+  mongo:
+    image: mongo:6.0.8
+    expose:
+      - "27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - backend-network
+
+  api:
+    build: ./simpleAPI
+    expose:
+      - "3000"
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/hitcounter
+    depends_on:
+      - mongo
+    networks:
+      - backend-network
+
+  frontend:
+    build: ./simpleReactApp
+    expose:
+      - "80"
+    depends_on:
+      - api
+    networks:
+      - backend-network
+
+  proxy:
+    build: ./proxy
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - api
+    networks:
+      - frontend-network
+      - backend-network
+
+networks:
+  frontend-network:
+    driver: bridge
+  backend-network:
+    driver: bridge
+    internal: true
+
+volumes:
+  mongodb_data:
