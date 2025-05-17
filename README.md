@@ -6,11 +6,8 @@ Este repositorio contiene una colección de ejemplos prácticos de Docker y Dock
 
 ```
 EA-Docker/
-├── simpleApp/          # Aplicación simple en Python/Flask
 ├── simpleAPI/          # API REST en TypeScript
-├── simpleReactApp/     # Frontend en React
-└── proxy/              # Nginx proxy inverso
-
+└── simpleReactApp/     # Frontend en React
 ```
 
 ## Arquitectura del Proyecto Principal
@@ -19,38 +16,35 @@ El proyecto principal utiliza una arquitectura de microservicios con:
 - Frontend en React
 - API REST en TypeScript
 - Base de datos MongoDB
-- Proxy inverso Nginx
-- Redes Docker aisladas (frontend-network y backend-network)
+- Acceso directo a los servicios
 
 ```mermaid
 graph TD
     Client([Cliente Externo])
-    subgraph frontend-network
-        Proxy[Proxy Nginx]
-    end
-    subgraph backend-network
+    subgraph docker-network
         Frontend[Frontend React]
         API[API TypeScript]
-        MongoDB[(MongoDB)]
+        MongoDB[(MongoDB: Solo acceso interno)]
     end
     
-    Client -->|HTTP 80| Proxy
-    Proxy -->|HTTP| Frontend
-    Proxy -->|/api| API
+    Client -->|HTTP 80| Frontend
+    Client -->|HTTP 3000| API
     API -->|MongoDB Protocol| MongoDB
     
     style Client fill:#f9f,stroke:#333,stroke-width:2px
-    style frontend-network fill:#f0f0f0,stroke:#333,stroke-width:2px
-    style backend-network fill:#e1e1e1,stroke:#333,stroke-width:2px
-    style Proxy fill:#85C1E9,stroke:#333,stroke-width:2px
+    style docker-network fill:#e1e1e1,stroke:#333,stroke-width:2px
     style Frontend fill:#82E0AA,stroke:#333,stroke-width:2px
     style API fill:#F8C471,stroke:#333,stroke-width:2px
     style MongoDB fill:#C39BD3,stroke:#333,stroke-width:2px
+
+    classDef secured stroke-dasharray: 5 5
+    class MongoDB secured
 ```
 
-### Redes Docker
-- `frontend-network`: Red pública donde solo está expuesto el proxy
-- `backend-network`: Red interna donde están los servicios (api, frontend, mongo)
+### Red Docker
+- `backend-network`: Red donde se encuentran todos los servicios
+  - MongoDB solo es accesible internamente a través de `expose`
+  - Frontend y API son accesibles externamente a través de `ports`
 
 ## Ejecución del Proyecto Principal
 
@@ -61,9 +55,8 @@ docker-compose up --build
 ```
 
 Esto iniciará:
-- Proxy inverso en http://IP:80
-- Frontend servido a través del proxy
-- API accesible en /api a través del proxy
+- Frontend en http://localhost:80
+- API accesible en http://localhost:3000
 - MongoDB (no accesible desde exterior)
 
 ## Ejemplos Individuales
@@ -87,7 +80,7 @@ cd simpleReactApp
 docker build -t simple-react .
 docker run -p 3001:3000 simple-react
 ```
-Accede a http://localhost:3001
+Accede a http://localhost:80
 
 ### 3. Aplicación Completa (API + Frontend + MongoDB)
 Ejecuta la API, MongoDB y el frontend juntos usando Docker Compose:

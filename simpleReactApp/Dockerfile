@@ -7,7 +7,7 @@ RUN npm install
 COPY . .
 
 # El argumento se puede sobreescribir durante el build
-ARG REACT_APP_API_URL=http://localhost:80/api
+ARG REACT_APP_API_URL=http://localhost:3000
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
 RUN npm run build
